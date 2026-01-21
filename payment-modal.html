@@ -1,0 +1,118 @@
+<!-- payment-modal.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make payment</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/payment-modal.css">
+</head>
+<body>
+    <div class="payment-container">
+        <div class="payment-card">
+            <div class="payment-header">
+                <h2><i class="fas fa-lock me-2"></i>Secure Payment</h2>
+                <p class="mb-0">Make a secure deposit to your investment account</p>
+            </div>
+            
+            <div class="payment-methods">
+                <!-- Amount Section -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold mb-3">Amount (GH₵)</label>
+                    <input type="number" 
+                           class="amount-input" 
+                           id="amount" 
+                           min="10" 
+                           max="10000" 
+                           value="100"
+                           placeholder="0.00">
+                    
+                    <div class="amount-presets mt-3">
+                        <button class="amount-btn" data-amount="100">GH₵100</button>
+                        <button class="amount-btn" data-amount="200">GH₵200</button>
+                        <button class="amount-btn" data-amount="100">GH₵300</button>
+                        <button class="amount-btn" data-amount="500">GH₵500</button>
+                        <button class="amount-btn" data-amount="1000">GH₵1000</button>
+                    </div>
+                </div>
+                
+                <!-- Payment Methods -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold mb-3">Select Payment Method</label>
+                    
+                    <div class="method-item active" data-method="mtn">
+                        <div class="method-icon mtn">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">MTN Mobile Money</h5>
+                            <p class="text-muted mb-0">Pay with your MTN MoMo wallet</p>
+                        </div>
+                    </div>
+                    
+                    <div class="method-item" data-method="vodafone">
+                        <div class="method-icon vodafone">
+                            <i class="fas fa-signal"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">Vodafone Cash</h5>
+                            <p class="text-muted mb-0">Pay with your Vodafone Cash</p>
+                        </div>
+                    </div>
+                    
+                    <div class="method-item" data-method="airteltigo">
+                        <div class="method-icon airteltigo">
+                            <i class="fas fa-wifi"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">AirtelTigo Money</h5>
+                            <p class="text-muted mb-0">Pay with AirtelTigo Money</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Phone Number Input (for mobile money) -->
+                <div class="mb-4" id="phoneSection">
+                    <label class="form-label fw-bold mb-2">Mobile Money Number</label>
+                    <input type="tel" 
+                           class="form-control phone-input" 
+                           id="phoneNumber" 
+                           placeholder="e.g., 0591234567"
+                           pattern="[0]{1}[0-9]{9}"
+                           maxlength="10">
+                    <small class="text-muted">Enter your 10-digit mobile money number starting with 0</small>
+                </div>
+                
+                <!-- Email Input (for cards) -->
+                <div class="mb-4 d-none" id="emailSection">
+                    <label class="form-label fw-bold mb-2">Email Address</label>
+                    <input type="email" 
+                           class="form-control phone-input" 
+                           id="email" 
+                           placeholder="you@example.com">
+                </div>
+                
+                <!-- Payment Button -->
+                <button class="pay-btn" id="payButton">
+                    <i class="fas fa-lock me-2"></i>Pay GH₵<span id="displayAmount">100</span>
+                </button>
+                
+                <!-- Security Note -->
+                <div class="text-center mt-4">
+                    <p class="text-muted small">
+                        <i class="fas fa-shield-alt me-1"></i>
+                        Your payment is secured with 256-bit SSL encryption
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paystack Script -->
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    
+    <script src="js/payment-modal.js"></script></body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Referral Program | GhanaInvest</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/referral.css">
+    </head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand">
+                <i class="fas fa-arrow-left back-button" onclick="goBack()"></i>
+                <img src="logo.png" height="40">
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Header Section -->
+        <div class="referral-header">
+            <h1>Referral Program</h1>
+            <p class="mb-0">Earn rewards by inviting friends to join GhanaInvest</p>
+        </div>
+        
+        <!-- Stats Section -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-value referrals">24</div>
+                <div class="stat-label">Total Referrals</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value earnings">GH₵ 480.00</div>
+                <div class="stat-label">Total Earnings</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value pending">GH₵ 120.00</div>
+                <div class="stat-label">Pending Earnings</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value">GH₵ 10.00</div>
+                <div class="stat-label">Earnings Per Referral</div>
+            </div>
+        </div>
+        
+        <!-- Referral Link Section -->
+        <div class="referral-link-section">
+            <h2 class="section-title">Your Referral Link</h2>
+            
+            <div class="link-container">
+                <input type="text" class="link-input" id="referralLink" value="https://ghanainvest.com/ref/alexj123" readonly>
+                <button class="btn-copy" id="copyButton">
+                    <i class="fas fa-copy me-2"></i> Copy
+                </button>
+            </div>
+            
+            <p class="mb-3">Share your referral link with friends and earn GH₵10 for each successful referral!</p>
+            
+            <div class="share-buttons">
+                <button class="share-btn btn-whatsapp">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+                <button class="share-btn btn-facebook">
+                    <i class="fab fa-facebook"></i> Facebook
+                </button>
+                <button class="share-btn btn-telegram">
+                    <i class="fab fa-telegram"></i> Telegram
+                </button>
+                <button class="share-btn btn-twitter">
+                    <i class="fab fa-twitter"></i> Twitter
+                </button>
+            </div>
+        </div>
+        
+        <!-- Referrals Table -->
+        <div class="referrals-section">
+            <h2 class="section-title">Your Referrals</h2>
+            
+            <div class="table-responsive">
+                <table class="referrals-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Join Date</th>
+                            <th>Status</th>
+                            <th>Earnings</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Kwame Mensah</td>
+                            <td>Oct 15, 2023</td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td>GH₵ 10.00</td>
+                        </tr>
+                        <tr>
+                            <td>Ama Johnson</td>
+                            <td>Oct 12, 2023</td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td>GH₵ 10.00</td>
+                        </tr>
+                        <tr>
+                            <td>Kofi Appiah</td>
+                            <td>Oct 10, 2023</td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                            <td>GH₵ 0.00</td>
+                        </tr>
+                        <tr>
+                            <td>Abena Sarpong</td>
+                            <td>Oct 5, 2023</td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td>GH₵ 10.00</td>
+                        </tr>
+                        <tr>
+                            <td>Yaw Boateng</td>
+                            <td>Oct 3, 2023</td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td>GH₵ 10.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- How It Works -->
+        <div class="how-it-works">
+            <h2 class="section-title">How It Works</h2>
+            
+            <div class="steps-container">
+                <div class="step-card">
+                    <div class="step-icon">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <h4>Share Your Link</h4>
+                    <p>Share your unique referral link with friends and family</p>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h4>They Sign Up</h4>
+                    <p>Your friends sign up using your referral link</p>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <h4>They Invest</h4>
+                    <p>Your friends make their first investment (minimum GH₵100)</p>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-icon">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <h4>You Earn</h4>
+                    <p>You receive 0.05% for each successful referral</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">GhanaInvest</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body"></div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="js/referral.js"></script>
+</body>
+</html>

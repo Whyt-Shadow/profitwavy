@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghana Mobile Money Investment Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-arrow-left back-button" onclick="goBack()"></i>
+                <img src="logo.png" height="40">
+            </a>
+        </div>
+    </nav>
+
+    <!-- Deposit Section -->
+    <div class="container">
+        <div id="deposit">
+            <h2 class="section-title">Deposit Funds</h2>
+            <div class="mt-4 p-3 bg-light rounded">
+                <h5 class="mb-3">Deposit Instructions</h5>
+                <ol>
+                    <li>Click on product on the button bar</li>
+                    <li>Browse through the list of investment available</li>
+                    <li>After choosing your desired invest click on invest</li>
+                    <li>Select your mobile network provider</li>
+                    <li>Enter your mobile money number</li>
+                    <li>Enter the amount you wish to deposit</li>
+                    <li>Click "Deposit Now"</li>
+                    <li>Confirm the payment on your phone when prompted</li>
+                </ol>
+                <p class="mb-0 text-muted"><small>Deposits are processed instantly. Minimum deposit is GH₵100.</small></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">GhanaInvest</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body"></div>
+    </div>
+        </a>
+    </nav>
+    <script src="js/back.js"></script>
+</body>
+</html>
