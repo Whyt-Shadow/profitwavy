@@ -1,8 +1,8 @@
 class APIService {
   constructor() {
     // Auto-detect environment
-    this.BASE_URL = window.location.hostname === 'localhost' 
-      ? 'http://localhost:5000/api'
+    this.BASE_URL = window.location.hostname === 'https://profitwavy.onrender.com' 
+      ? 'https://profitwavy.onrender.com'
       : 'mongodb+srv://armbhixion1_db_user:Arm1bhixion@cluster0.pvyd5lr.mongodb.net/?appName=Cluster0';
     
     this.token = localStorage.getItem('authToken');
@@ -60,3 +60,4 @@ class APIService {
   }
 
 }
+
