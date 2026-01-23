@@ -3,7 +3,7 @@ class APIService {
     // Auto-detect environment
     this.BASE_URL = window.location.hostname === 'localhost' 
       ? 'http://localhost:5000/api'
-      : 'https://profitway-93658-default-rtdb.firebaseio.com/';
+      : 'mongodb+srv://armbhixion1_db_user:Arm1bhixion@cluster0.pvyd5lr.mongodb.net/?appName=Cluster0';
     
     this.token = localStorage.getItem('authToken');
   }
@@ -58,4 +58,5 @@ class APIService {
       throw error;
     }
   }
+
 }
