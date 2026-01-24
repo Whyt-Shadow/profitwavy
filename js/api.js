@@ -6,7 +6,7 @@ class APIService {
     
     // Set correct API endpoints
     this.BASE_URL = isProduction 
-      ? 'https://profitwavy.onrender.com'  // Your Render backend
+      ? 'https://profitwavy.onrender.com:5000'  // Your Render backend
       : 'http://localhost:5000';           // Local development
     
     this.token = localStorage.getItem('authToken');
@@ -73,3 +73,4 @@ class APIService {
     }
   }
 }
+
