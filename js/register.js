@@ -104,7 +104,7 @@
     submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span> Creating account…';
 
     try {
-      await window.ProfitWavyAPI.register(fullName, phone, password, referralCode || undefined);
+      await window.MONGODB_URI.register(fullName, phone, password, referralCode || undefined);
 
       showToast('Account created successfully! Redirecting…', 'success');
 
@@ -126,3 +126,4 @@
     window.location.href = 'dashboard.html';
   }
 })();
+
