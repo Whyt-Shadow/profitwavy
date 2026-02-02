@@ -64,68 +64,82 @@
   });
 
   // ── Form submit ────────────────────────────────────────────────────────────
-  registerForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const fullName     = nameInput.value.trim();
-    const phone        = phoneInput.value.trim();
-    const password     = passwordInput.value;
-    const referralCode = referralInput ? referralInput.value.trim() : '';
-
-    // ── Front-end validation ─────────────────────────────────────────────
-    let valid = true;
-
-    if (fullName.length < 2) {
-      nameInput.classList.add('is-invalid');
-      valid = false;
-    } else {
-      nameInput.classList.remove('is-invalid');
-    }
-
-    if (!/^0\d{9}$/.test(phone)) {
-      phoneInput.classList.add('is-invalid');
-      valid = false;
-    } else {
-      phoneInput.classList.remove('is-invalid');
-    }
-
-    if (password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) ||
-        !/[0-9]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
-      passwordInput.classList.add('is-invalid');
-      valid = false;
-    } else {
-      passwordInput.classList.remove('is-invalid');
-    }
-
-    if (!valid) return;
-
-    // ── Disable button ───────────────────────────────────────────────────
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span> Creating account…';
-
-    try {
-      await window.ProfitWavyAPI.register(fullName, phone, password, referralCode || undefined);
-
-      showToast('Account created successfully! Redirecting…', 'success');
-
+  document.getElementById('registerForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  // Get form values
+  const name = document.getElementById('registerName').value.trim();
+  const phone = document.getElementById('registerPhone').value.replace(/\D/g, '');
+  const password = document.getElementById('registerPassword').value;
+  const referral = document.getElementById('registerReferral').value.trim();
+  
+  // Validate phone format
+  if (!/^0\d{9}$/.test(phone)) {
+    showToast('Please enter a valid phone number (0244123456)', 'error');
+    return;
+  }
+  
+  // Show loading
+  const submitBtn = this.querySelector('button[type="submit"]');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Creating Account...';
+  
+  try {
+    // Call API
+    const result = await api.register({
+      name,
+      phone,
+      password,
+      referral
+    });
+    
+    console.log('Registration result:', result);
+    
+    // ✅ FIX: Check result.status instead of just result.success
+    if (result.status === 409) {
+      // Phone already exists
+      showToast('This phone number is already registered. Please login instead.', 'error');
+      
+      // Clear phone field and focus
+      document.getElementById('registerPhone').value = '';
+      document.getElementById('registerPhone').focus();
+      
+    } else if (result.data && result.data.success) {
+      // Registration successful
+      localStorage.setItem('authToken', result.data.token);
+      localStorage.setItem('user', JSON.stringify(result.data.user));
+      
+      showToast('Account created successfully! Redirecting...', 'success');
+      
+      // Redirect to dashboard
       setTimeout(() => {
         window.location.href = 'dashboard.html';
-      }, 1200);
-
-    } catch (error) {
-      showToast(error.message || 'Registration failed. Please try again.', 'error');
-
-      // Re-enable button
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i> Create Account';
+      }, 2000);
+      
+    } else if (result.data && result.data.message) {
+      // Other error from backend
+      showToast(result.data.message, 'error');
+    } else {
+      showToast('Registration failed. Please try again.', 'error');
     }
-  });
-
-  // ── If already logged in, skip to dashboard ───────────────────────────────
-  if (window.ProfitWavyAPI && window.ProfitWavyAPI.getToken()) {
-    window.location.href = 'dashboard.html';
+    
+  } catch (error) {
+    console.error('Registration error:', error);
+    
+    // ✅ FIX: Better error messages
+    if (error.message.includes('Network') || error.message.includes('Failed to fetch')) {
+      showToast('Network error. Please check your connection.', 'error');
+    } else if (error.message.includes('CORS')) {
+      showToast('Connection error. Please try again.', 'error');
+    } else {
+      showToast(error.message || 'Registration failed. Please try again.', 'error');
+    }
+    
+  } finally {
+    // Reset button
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalText;
   }
+})
 })();
-
-
-
