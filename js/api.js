@@ -3,8 +3,7 @@
   'use strict';
 
   // ── Configuration ──────────────────────────────────────────────────────────
-  const metaTag = document.querySelector('meta[name="api-base"]');
-  const BASE_URL = metaTag ? metaTag.getAttribute('content') : '';
+  const BASE_URL = 'https://profit-wavy.onrender.com';
 
   // Storage keys (fallback for development - production should use httpOnly cookies)
   const TOKEN_KEY = 'profitwavy_token';
