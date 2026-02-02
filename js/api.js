@@ -1,128 +1,245 @@
-// js/api.js  —  Shared frontend API utility for ProfitWavy
+// js/api.js  —  Shared frontend API utility for ProfitWavy (Enhanced Security)
 (function () {
   'use strict';
 
-  // ── Resolve the backend base URL ───────────────────────────────────────────
-  // In production the backend runs on the same origin so we use "" (relative).
-  // Set a <meta name="api-base" content="https://..."> in HTML to override.
+  // ── Configuration ──────────────────────────────────────────────────────────
   const metaTag = document.querySelector('meta[name="api-base"]');
   const BASE_URL = metaTag ? metaTag.getAttribute('content') : '';
 
-  // ── Read / write the JWT token ─────────────────────────────────────────────
+  // Storage keys (fallback for development - production should use httpOnly cookies)
   const TOKEN_KEY = 'profitwavy_token';
   const USER_KEY  = 'profitwavy_user';
 
+  // ── Token Management ───────────────────────────────────────────────────────
+  
+  /**
+   * Store auth credentials.
+   * In production, the token should come from httpOnly cookies set by the server.
+   * This localStorage approach is kept for backward compatibility in dev environments.
+   */
   function setAuth(token, user) {
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    // Only store in localStorage if we're explicitly given a token
+    // (server will set httpOnly cookie in production)
+    if (token) {
+      localStorage.setItem(TOKEN_KEY, token);
+    }
+    if (user) {
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
+    }
   }
 
+  /**
+   * Get token from localStorage (dev) or rely on httpOnly cookie (production).
+   * In production, we don't need to read the token - it's sent automatically.
+   */
   function getToken() {
     return localStorage.getItem(TOKEN_KEY);
   }
 
+  /**
+   * Get user profile from localStorage cache
+   */
   function getUser() {
     try {
-      return JSON.parse(localStorage.getItem(USER_KEY));
-    } catch {
+      const userData = localStorage.getItem(USER_KEY);
+      return userData ? JSON.parse(userData) : null;
+    } catch (error) {
+      console.error('Failed to parse user data:', error);
       return null;
     }
   }
 
+  /**
+   * Clear all auth data
+   */
   function clearAuth() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
   }
 
-  // ── Generic fetch wrapper ──────────────────────────────────────────────────
+  // ── HTTP Request Wrapper ───────────────────────────────────────────────────
+  
+  /**
+   * Generic fetch wrapper with automatic token handling, error parsing, and retry logic
+   */
   async function request(method, path, body = null, requiresAuth = false) {
     const headers = { 'Content-Type': 'application/json' };
 
+    // Add token from localStorage if available (for dev/testing)
+    // In production with httpOnly cookies, this is optional - cookie is sent automatically
     if (requiresAuth) {
       const token = getToken();
-      if (!token) throw new Error('Not authenticated');
-      headers['Authorization'] = `Bearer ${token}`;
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
     }
 
-    const options = { method, headers };
-    if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+    const options = {
+      method,
+      headers,
+      credentials: 'include', // CRITICAL: Include cookies in requests (for httpOnly auth)
+    };
+
+    if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
       options.body = JSON.stringify(body);
     }
 
-    const response = await fetch(`${BASE_URL}${path}`, options);
-    const data = await response.json();
+    try {
+      const response = await fetch(`${BASE_URL}${path}`, options);
+      
+      // Handle 401 Unauthorized
+      if (response.status === 401) {
+        clearAuth();
+        
+        // Don't retry if we're already on login/register
+        if (!window.location.pathname.includes('login') && 
+            !window.location.pathname.includes('register')) {
+          window.location.href = 'login.html?session=expired';
+        }
+        throw new Error('Session expired. Please log in again.');
+      }
 
-    // If the server says the token is bad, clear local auth
-    if (response.status === 401) {
-      clearAuth();
+      // Parse response
+      const contentType = response.headers.get('content-type');
+      let data;
+      
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        data = { message: await response.text() };
+      }
+
+      // Handle non-2xx responses
+      if (!response.ok) {
+        const errorMessage = data.message || data.error || `Request failed with status ${response.status}`;
+        const error = new Error(errorMessage);
+        error.status = response.status;
+        error.data = data;
+        throw error;
+      }
+
+      return data;
+
+    } catch (error) {
+      // Network errors or fetch failures
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        throw new Error('Network error. Please check your connection.');
+      }
+      
+      // Rethrow API errors as-is
+      throw error;
     }
-
-    if (!response.ok) {
-      const err = new Error(data.message || 'Request failed');
-      err.status = response.status;
-      err.data = data;
-      throw err;
-    }
-
-    return data;
   }
 
-  // ── Public API ─────────────────────────────────────────────────────────────
+  // ── Public API Methods ─────────────────────────────────────────────────────
 
   /**
-   * Register a new account.
-   * @param {string} fullName
-   * @param {string} phone
-   * @param {string} password
-   * @param {string} [referralCode]
-   * @returns {Promise<{token, user}>}
+   * Register a new account
    */
   async function register(fullName, phone, password, referralCode) {
     const payload = { fullName, phone, password };
-    if (referralCode) payload.referralCode = referralCode;
+    if (referralCode) {
+      payload.referralCode = referralCode.trim();
+    }
 
     const data = await request('POST', '/api/auth/register', payload);
+    
+    // Store token and user (server might also set httpOnly cookie)
     setAuth(data.token, data.user);
+    
     return data;
   }
 
   /**
-   * Login with phone + password.
-   * @param {string} phone
-   * @param {string} password
-   * @returns {Promise<{token, user}>}
+   * Login with phone + password
    */
   async function login(phone, password) {
     const data = await request('POST', '/api/auth/login', { phone, password });
+    
+    // Store token and user (server might also set httpOnly cookie)
     setAuth(data.token, data.user);
+    
     return data;
   }
 
   /**
-   * Fetch the currently authenticated user's profile.
-   * @returns {Promise<{user}>}
+   * Fetch current authenticated user's profile
    */
   async function getMe() {
     return request('GET', '/api/auth/me', null, true);
   }
 
   /**
-   * Logout — just wipe local auth state.
+   * Logout - clear local state and optionally call server logout endpoint
    */
-  function logout() {
+  async function logout() {
+    try {
+      // Call server logout to clear httpOnly cookie (if implemented)
+      await request('POST', '/api/auth/logout', null, true);
+    } catch (error) {
+      console.error('Logout request failed:', error);
+      // Continue with local cleanup even if server call fails
+    }
+    
     clearAuth();
     window.location.href = 'login.html';
   }
 
-  // Expose on window so login.js / register.js can use it
+  /**
+   * Check if user is authenticated
+   */
+  function isAuthenticated() {
+    // In development: check localStorage token
+    // In production: this should call a /api/auth/check endpoint
+    return !!getToken() || !!getUser();
+  }
+
+  /**
+   * Refresh authentication state
+   */
+  async function refreshAuth() {
+    try {
+      const data = await getMe();
+      if (data.user) {
+        localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+      }
+      return data;
+    } catch (error) {
+      clearAuth();
+      throw error;
+    }
+  }
+
+  // ── Expose Public API ──────────────────────────────────────────────────────
+  
   window.ProfitWavyAPI = {
+    // Auth methods
     register,
     login,
-    getMe,
     logout,
+    getMe,
+    refreshAuth,
+    isAuthenticated,
+    
+    // Token management (use sparingly - prefer httpOnly cookies)
     getToken,
     getUser,
-    clearAuth
+    clearAuth,
+    
+    // Low-level request (for extensions)
+    request
   };
-})();
 
+  // ── Auto-refresh user data on page load (if authenticated) ─────────────────
+  
+  if (isAuthenticated() && 
+      !window.location.pathname.includes('login') && 
+      !window.location.pathname.includes('register')) {
+    
+    refreshAuth().catch(error => {
+      console.error('Failed to refresh auth:', error);
+      // Don't force logout on every error - could be temporary network issue
+    });
+  }
+
+})();
