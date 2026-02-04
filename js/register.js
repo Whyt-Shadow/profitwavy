@@ -20,12 +20,6 @@ function initFormValidation() {
     passwordInput.addEventListener('input', updatePasswordStrength);
   }
   
-  // Phone number formatting
-  const phoneInput = document.getElementById('registerPhone');
-  if (phoneInput) {
-    phoneInput.addEventListener('input', formatPhoneNumber);
-  }
-  
   // Form submission
   form.addEventListener('submit', handleRegistration);
 }
@@ -190,5 +184,3 @@ function showToast(message, type = 'success') {
     toast.className = 'toast';
   }, 5000);
 }
-
-
