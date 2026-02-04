@@ -84,16 +84,16 @@ function initPhoneFormatting() {
     // Remove non-digits
     let value = e.target.value.replace(/\D/g, '');
     
-    // Limit to 11 digits
-    if (value.length > 11) {
-      value = value.slice(0, 11);
+    // Limit to 10 digits (Ghanaian format)
+    if (value.length > 10) {
+      value = value.slice(0, 10);
     }
     
-    // Format as: 0XXX-XXX-XXXX
-    if (value.length > 4 && value.length <= 7) {
-      value = value.slice(0, 4) + '-' + value.slice(4);
-    } else if (value.length > 7) {
-      value = value.slice(0, 4) + '-' + value.slice(4, 7) + '-' + value.slice(7);
+    // Format as: 0XX XXX XXXX (Ghanaian format)
+    if (value.length > 3 && value.length <= 6) {
+      value = value.slice(0, 3) + ' ' + value.slice(3);
+    } else if (value.length > 6) {
+      value = value.slice(0, 3) + ' ' + value.slice(3, 6) + ' ' + value.slice(6);
     }
     
     e.target.value = value;
@@ -254,11 +254,13 @@ function validateAllFields(name, phone, password) {
     };
   }
   
-  // Nigerian phone number validation
-  if (!/^0[789][01]\d{8}$/.test(phone)) {
+  // Ghanaian phone number validation
+  // Formats: 0XX XXX XXXX (10 digits starting with 0)
+  // Valid prefixes: 020, 023, 024, 025, 026, 027, 028, 050, 054, 055, 056, 057, 059
+  if (!/^0(20|23|24|25|26|27|28|50|54|55|56|57|59)\d{7}$/.test(phone)) {
     return {
       isValid: false,
-      message: 'Please enter a valid Nigerian phone number (e.g., 0803 123 4567)'
+      message: 'Please enter a valid Ghanaian phone number (e.g., 024 123 4567)'
     };
   }
   
@@ -338,9 +340,9 @@ function validateField(input, type) {
       
     case 'phone':
       const phone = value.replace(/\D/g, '');
-      if (!/^0[789][01]\d{8}$/.test(phone)) {
+      if (!/^0(20|23|24|25|26|27|28|50|54|55|56|57|59)\d{7}$/.test(phone)) {
         isValid = false;
-        message = 'Invalid phone number format';
+        message = 'Invalid Ghanaian phone number format';
       }
       break;
       
