@@ -161,13 +161,6 @@ function updatePasswordStrength() {
   }
 }
 
-function formatPhoneNumber(e) {
-  const input = e.target;
-  let value = input.value.replace(/\D/g, '');
-  
-  input.value = value;
-}
-
 function showToast(message, type = 'success') {
   const toast = document.getElementById('toast');
   const toastMessage = document.getElementById('toastMessage');
@@ -197,4 +190,5 @@ function showToast(message, type = 'success') {
     toast.className = 'toast';
   }, 5000);
 }
+
 
