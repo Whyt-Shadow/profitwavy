@@ -165,17 +165,6 @@ function formatPhoneNumber(e) {
   const input = e.target;
   let value = input.value.replace(/\D/g, '');
   
-  // Format as 0XXX XXX XXX
-  if (value.length > 0) {
-    value = value.substring(0, 10);
-    
-    if (value.length > 3) {
-      value = value.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3');
-    } else if (value.length > 1) {
-      value = value.replace(/(\d{3})/, '$1');
-    }
-  }
-  
   input.value = value;
 }
 
@@ -208,3 +197,4 @@ function showToast(message, type = 'success') {
     toast.className = 'toast';
   }, 5000);
 }
+
