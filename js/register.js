@@ -1,129 +1,210 @@
-// js/register.js  —  Registration page logic for ProfitWavy
-(function () {
-  'use strict';
-
-  // ── DOM refs ───────────────────────────────────────────────────────────────
-  const registerForm       = document.getElementById('registerForm');
-  const nameInput          = document.getElementById('registerName');
-  const phoneInput         = document.getElementById('registerPhone');
-  const passwordInput      = document.getElementById('registerPassword');
-  const referralInput      = document.getElementById('registerReferral');
-  const toggleBtn          = document.getElementById('passwordToggle');
-  const strengthBar        = document.getElementById('passwordStrengthBar');
-  const strengthText       = document.getElementById('passwordStrengthText');
-  const toastMessage       = document.getElementById('toastMessage');
-  const toastEl            = document.getElementById('toast');
-  const submitBtn          = registerForm.querySelector('button[type="submit"]');
-
-  // ── Toast helper ───────────────────────────────────────────────────────────
-  function showToast(message, type = 'success') {
-    toastMessage.textContent = message;
-    toastEl.className = 'toast show';
-    toastEl.classList.add(type === 'success' ? 'bg-success' : 'bg-danger', 'text-white');
-    setTimeout(() => { toastEl.classList.remove('show'); }, 4000);
-  }
-
-  // ── Password toggle ────────────────────────────────────────────────────────
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      const isPassword = passwordInput.type === 'password';
-      passwordInput.type = isPassword ? 'text' : 'password';
-      toggleBtn.querySelector('i').classList.toggle('fa-eye', !isPassword);
-      toggleBtn.querySelector('i').classList.toggle('fa-eye-slash', isPassword);
-    });
-  }
-
-  // ── Password strength meter ────────────────────────────────────────────────
-  function evaluateStrength(password) {
-    let score = 0;
-    if (password.length >= 8)           score++;
-    if (password.length >= 12)          score++;
-    if (/[A-Z]/.test(password))         score++;
-    if (/[a-z]/.test(password))         score++;
-    if (/[0-9]/.test(password))         score++;
-    if (/[^A-Za-z0-9]/.test(password))  score++;
-    return score; // 0-6
-  }
-
-  passwordInput.addEventListener('input', () => {
-    const password = passwordInput.value;
-    const score    = evaluateStrength(password);
-
-    // Map score to a width percentage and label
-    let width, label, color;
-    if (score <= 2)      { width = '25%'; label = 'Weak';   color = '#dc3545'; }
-    else if (score <= 3) { width = '40%'; label = 'Fair';   color = '#fd7e14'; }
-    else if (score <= 4) { width = '60%'; label = 'Good';   color = '#ffc107'; }
-    else if (score <= 5) { width = '80%'; label = 'Strong'; color = '#28a745'; }
-    else                 { width = '100%'; label = 'Very Strong'; color = '#198754'; }
-
-    strengthBar.style.width        = width;
-    strengthBar.style.backgroundColor = color;
-    strengthText.textContent       = label;
-    strengthText.style.color       = color;
-  });
-
-  // ── Form submit ────────────────────────────────────────────────────────────
-  registerForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const fullName     = nameInput.value.trim();
-    const phone        = phoneInput.value.trim();
-    const password     = passwordInput.value;
-    const referralCode = referralInput ? referralInput.value.trim() : '';
-
-    // ── Front-end validation ─────────────────────────────────────────────
-    let valid = true;
-
-    if (fullName.length < 2) {
-      nameInput.classList.add('is-invalid');
-      valid = false;
-    } else {
-      nameInput.classList.remove('is-invalid');
-    }
-
-    if (!/^0\d{9}$/.test(phone)) {
-      phoneInput.classList.add('is-invalid');
-      valid = false;
-    } else {
-      phoneInput.classList.remove('is-invalid');
-    }
-
-    if (password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) ||
-        !/[0-9]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
-      passwordInput.classList.add('is-invalid');
-      valid = false;
-    } else {
-      passwordInput.classList.remove('is-invalid');
-    }
-
-    if (!valid) return;
-
-    // ── Disable button ───────────────────────────────────────────────────
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span> Creating account…';
-
-    try {
-      await window.ProfitWavyAPI.register(fullName, phone, password, referralCode || undefined);
-
-      showToast('Account created successfully! Redirecting…', 'success');
-
-      setTimeout(() => {
-        window.location.href = 'dashboard.html';
-      }, 1200);
-
-    } catch (error) {
-      showToast(error.message || 'Registration failed. Please try again.', 'error');
-
-      // Re-enable button
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i> Create Account';
-    }
-  });
-
-  // ── If already logged in, skip to dashboard ───────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  // ✅ FIXED: Check if user is already authenticated
   if (window.ProfitWavyAPI && window.ProfitWavyAPI.isAuthenticated()) {
+    console.log('User already logged in, redirecting to dashboard...');
     window.location.href = 'dashboard.html';
+    return;
   }
-})();
+  
+  // Initialize form validation
+  initFormValidation();
+});
 
+function initFormValidation() {
+  const form = document.getElementById('registerForm');
+  if (!form) return;
+  
+  // Password strength indicator
+  const passwordInput = document.getElementById('registerPassword');
+  if (passwordInput) {
+    passwordInput.addEventListener('input', updatePasswordStrength);
+  }
+  
+  // Phone number formatting
+  const phoneInput = document.getElementById('registerPhone');
+  if (phoneInput) {
+    phoneInput.addEventListener('input', formatPhoneNumber);
+  }
+  
+  // Form submission
+  form.addEventListener('submit', handleRegistration);
+}
+
+async function handleRegistration(e) {
+  e.preventDefault();
+  
+  // Get form values
+  const name = document.getElementById('registerName')?.value.trim() || '';
+  const phone = document.getElementById('registerPhone')?.value.replace(/\D/g, '') || '';
+  const password = document.getElementById('registerPassword')?.value || '';
+  const referral = document.getElementById('registerReferral')?.value.trim() || '';
+  
+  // Validate
+  if (!validateForm(name, phone, password)) {
+    return;
+  }
+  
+  // Show loading
+  const submitBtn = document.querySelector('#registerForm button[type="submit"]');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Creating Account...';
+  
+  try {
+    // ✅ FIXED: Use the correct API call
+    const result = await window.ProfitWavyAPI.register(name, phone, password, referral);
+    
+    // Show success message
+    showToast('Account created successfully! Redirecting...', 'success');
+    
+    // Redirect to dashboard after delay
+    setTimeout(() => {
+      window.location.href = 'dashboard.html';
+    }, 2000);
+    
+  } catch (error) {
+    console.error('Registration error:', error);
+    
+    // Show error message
+    let errorMessage = error.message || 'Registration failed. Please try again.';
+    
+    // Specific error handling
+    if (error.message.includes('already registered')) {
+      errorMessage = 'This phone number is already registered. Please log in instead.';
+    } else if (error.message.includes('Network error')) {
+      errorMessage = 'Network error. Please check your internet connection.';
+    } else if (error.message.includes('CORS')) {
+      errorMessage = 'Connection error. Please try again.';
+    }
+    
+    showToast(errorMessage, 'error');
+    
+  } finally {
+    // Reset button
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalText;
+  }
+}
+
+function validateForm(name, phone, password) {
+  let isValid = true;
+  let message = '';
+  
+  // Name validation
+  if (name.length < 2) {
+    message = 'Please enter your full name (at least 2 characters)';
+    isValid = false;
+  }
+  
+  // Phone validation
+  else if (!/^0\d{9}$/.test(phone)) {
+    message = 'Please enter a valid phone number (10 digits starting with 0)';
+    isValid = false;
+  }
+  
+  // Password validation
+  else if (password.length < 8) {
+    message = 'Password must be at least 8 characters';
+    isValid = false;
+  }
+  
+  if (!isValid) {
+    showToast(message, 'error');
+  }
+  
+  return isValid;
+}
+
+function updatePasswordStrength() {
+  const password = document.getElementById('registerPassword')?.value || '';
+  const strengthBar = document.getElementById('passwordStrengthBar');
+  const strengthText = document.getElementById('passwordStrengthText');
+  
+  if (!strengthBar || !strengthText) return;
+  
+  if (password.length === 0) {
+    strengthBar.style.width = '0%';
+    strengthText.textContent = '';
+    return;
+  }
+  
+  let strength = 0;
+  
+  // Length check
+  if (password.length >= 8) strength += 20;
+  if (password.length >= 12) strength += 10;
+  
+  // Complexity checks
+  if (/[A-Z]/.test(password)) strength += 20;
+  if (/[a-z]/.test(password)) strength += 20;
+  if (/[0-9]/.test(password)) strength += 20;
+  if (/[^A-Za-z0-9]/.test(password)) strength += 20;
+  
+  // Cap at 100
+  strength = Math.min(strength, 100);
+  
+  // Update UI
+  strengthBar.style.width = strength + '%';
+  
+  if (strength < 40) {
+    strengthBar.style.backgroundColor = '#e74c3c';
+    strengthText.textContent = 'Weak';
+    strengthText.style.color = '#e74c3c';
+  } else if (strength < 80) {
+    strengthBar.style.backgroundColor = '#f39c12';
+    strengthText.textContent = 'Medium';
+    strengthText.style.color = '#f39c12';
+  } else {
+    strengthBar.style.backgroundColor = '#27ae60';
+    strengthText.textContent = 'Strong';
+    strengthText.style.color = '#27ae60';
+  }
+}
+
+function formatPhoneNumber(e) {
+  const input = e.target;
+  let value = input.value.replace(/\D/g, '');
+  
+  // Format as 0XXX XXX XXX
+  if (value.length > 0) {
+    value = value.substring(0, 10);
+    
+    if (value.length > 3) {
+      value = value.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3');
+    } else if (value.length > 1) {
+      value = value.replace(/(\d{3})/, '$1');
+    }
+  }
+  
+  input.value = value;
+}
+
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('toast');
+  const toastMessage = document.getElementById('toastMessage');
+  
+  if (!toast || !toastMessage) return;
+  
+  toastMessage.textContent = message;
+  
+  // Set color based on type
+  toast.className = 'toast show';
+  if (type === 'error') {
+    toast.style.backgroundColor = '#f8d7da';
+    toast.style.color = '#721c24';
+    toast.style.borderColor = '#f5c6cb';
+  } else if (type === 'warning') {
+    toast.style.backgroundColor = '#fff3cd';
+    toast.style.color = '#856404';
+    toast.style.borderColor = '#ffeaa7';
+  } else {
+    toast.style.backgroundColor = '#d4edda';
+    toast.style.color = '#155724';
+    toast.style.borderColor = '#c3e6cb';
+  }
+  
+  // Auto-hide after 5 seconds
+  setTimeout(() => {
+    toast.className = 'toast';
+  }, 5000);
+}
