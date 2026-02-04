@@ -122,7 +122,8 @@
   });
 
   // ── If already logged in, skip to dashboard ───────────────────────────────
-  if (window.ProfitWavyAPI && window.ProfitWavyAPI.getToken()) {
+  if (window.ProfitWavyAPI && window.ProfitWavyAPI.isAuthenticated()) {
     window.location.href = 'dashboard.html';
   }
 })();
+
