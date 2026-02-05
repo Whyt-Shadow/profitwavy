@@ -489,7 +489,7 @@
     }
     
     // Validate fields
-    const validationResult = validateAllFields(fullname, phone, password, confirmPassword);
+    const validationResult = validateAllFields(name, phone, password, confirmPassword);
     if (!validationResult.isValid) {
       showToast(validationResult.message, 'error');
       return;
@@ -644,6 +644,7 @@
   });
 
 })();
+
 
 
 
