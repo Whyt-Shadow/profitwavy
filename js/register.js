@@ -124,7 +124,7 @@
     
     const cleanPhone = phone.replace(/\D/g, '');
     if (!/^0(20|23|24|25|26|27|28|50|54|55|56|57|59)\d{7}$/.test(cleanPhone)) {
-      return { isValid: false, message: 'Please enter a valid Ghanaian phone number (e.g., 024 123 4567)' };
+      return { isValid: false, message: 'Please enter a valid Ghanaian phone number (e.g., 0241234567)' };
     }
     
     // Password validation
@@ -644,3 +644,4 @@
   });
 
 })();
+
