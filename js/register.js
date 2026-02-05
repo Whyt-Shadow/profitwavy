@@ -510,7 +510,7 @@
       }
       
       // Call API
-      console.log('Registration attempt:', { fullname, phone: phone.substring(0, 4) + '***' });
+      console.log('Registration attempt:', { name, phone: phone.substring(0, 4) + '***' });
       const result = await window.ProfitWavyAPI.register(fullname, phone, password, referral);
       
       console.log('Registration successful:', result);
@@ -644,6 +644,7 @@
   });
 
 })();
+
 
 
 
