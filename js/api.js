@@ -125,8 +125,8 @@
 
   // ── Public API Methods (Updated) ───────────────────────────────────────────
 
-  async function register(fullname, phone, password, referral = '') {
-    console.log('📝 Register attempt:', { fullname, phone });
+  async function register(name, phone, password, referral = '') {
+    console.log('📝 Register attempt:', { name, phone });
     
     // Validate phone format
     const cleanPhone = phone.replace(/\D/g, '');
@@ -294,4 +294,5 @@
   }
 
 })();
+
 
