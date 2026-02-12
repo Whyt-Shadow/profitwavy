@@ -474,7 +474,7 @@
     recordAttempt();
     
     // Get form values
-    const name = document.getElementById('registerName')?.value.trim() || '';
+    const name = document.getElementById('Full name')?.value.trim() || '';
     const phone = document.getElementById('registerPhone')?.value.replace(/\D/g, '') || '';
     const password = document.getElementById('registerPassword')?.value || '';
     const confirmPassword = document.getElementById('confirmPassword')?.value || '';
@@ -644,6 +644,7 @@
   });
 
 })();
+
 
 
 
