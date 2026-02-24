@@ -3,15 +3,11 @@
   'use strict';
 
   // ── Configuration ──────────────────────────────────────────────────────────
-  const BASE_URL = 'https://profit-wavy.onrender.com/api';  // ✅ FIXED: Added /api
-  
-  // Or if you want to detect environment:
-  // const BASE_URL = window.location.hostname.includes('profitwavy.com')
-  //   ? 'https://profit-wavy.onrender.com/api'  // Production
-  //   : 'http://localhost:5000/api';            // Development
+  const BASE_URL = 'https://profit-wavy.onrender.com/api';
 
   // Storage keys
   const TOKEN_KEY = 'profitwavy_token';
+  const REFRESH_TOKEN_KEY = 'profitwavy_refresh_token';
   const USER_KEY  = 'profitwavy_user';
 
   // ── Enhanced Request Wrapper ───────────────────────────────────────────────
@@ -36,8 +32,8 @@
     const options = {
       method,
       headers,
-      credentials: 'include', // Important for CORS with cookies
-      mode: 'cors'           // Explicitly set CORS mode
+      credentials: 'include',
+      mode: 'cors'
     };
 
     if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
@@ -54,9 +50,17 @@
         ok: response.ok
       });
 
-      // Handle 401 - Session expired
+      // Handle 401 - Try to refresh token
       if (response.status === 401) {
+        const refreshed = await refreshAccessToken();
+        if (refreshed) {
+          // Retry the request with new token
+          return request(method, path, body, requiresAuth);
+        }
+        
+        // Refresh failed - redirect to login
         localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(REFRESH_TOKEN_KEY);
         localStorage.removeItem(USER_KEY);
         
         if (!window.location.pathname.includes('login') && 
@@ -114,19 +118,45 @@
         }
       }
       
-      // Re-throw with better message
-      if (error.message.includes('API endpoint not found')) {
-        throw new Error(`Server error: ${path} endpoint is not available. Please contact support.`);
-      }
-      
       throw error;
     }
   }
 
-  // ── Public API Methods (Updated) ───────────────────────────────────────────
+  // ── Token Refresh ───────────────────────────────────────────────────────────
+  
+  async function refreshAccessToken() {
+    try {
+      const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+      if (!refreshToken) return false;
+      
+      const data = await request('POST', '/auth/refresh-token', {
+        refreshToken
+      });
+      
+      if (data.accessToken) {
+        localStorage.setItem(TOKEN_KEY, data.accessToken);
+        if (data.refreshToken) {
+          localStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
+        }
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      return false;
+    }
+  }
 
-  async function register(name, phone, password, referral = '') {
-    console.log('📝 Register attempt:', { name, phone });
+  // ── Public API Methods ─────────────────────────────────────────────────────
+
+  async function register(fullName, phone, password, referralCode = '') {
+    console.log('📝 Register attempt:', { fullName, phone });
+    
+    // Validate name length
+    if (!fullName || fullName.trim().length < 2) {
+      throw new Error('Full name must be at least 2 characters');
+    }
     
     // Validate phone format
     const cleanPhone = phone.replace(/\D/g, '');
@@ -139,44 +169,92 @@
       throw new Error('Password must be at least 8 characters');
     }
     
+    // Send data matching backend expectations
     const data = await request('POST', '/auth/register', {
-      name,
+      fullName: fullName.trim(),
       phone: cleanPhone,
       password,
-      referral
+      referralCode: referralCode.trim() || undefined
     });
     
-    // Store auth data
-    if (data.token) {
-      localStorage.setItem(TOKEN_KEY, data.token);
+    // Store auth data (backend returns accessToken/refreshToken)
+    if (data.accessToken) {
+      localStorage.setItem(TOKEN_KEY, data.accessToken);
     }
-    if (data.user) {
-      localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+    if (data.refreshToken) {
+      localStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
+    }
+    if (data.data) {
+      localStorage.setItem(USER_KEY, JSON.stringify(data.data));
     }
     
     return data;
   }
 
-  async function login(phone, password) {
-    console.log('🔐 Login attempt:', { phone });
+  async function login(identifier, password) {
+    console.log('🔐 Login attempt:', { identifier });
     
-    // Clean phone number
-    const cleanPhone = phone.replace(/\D/g, '');
+    // Validate identifier
+    if (!identifier) {
+      throw new Error('Email or phone number is required');
+    }
     
+    // Send data matching backend expectations
     const data = await request('POST', '/auth/login', {
-      phone: cleanPhone,
+      identifier: identifier.trim(),
       password
     });
     
     // Store auth data
-    if (data.token) {
-      localStorage.setItem(TOKEN_KEY, data.token);
+    if (data.accessToken) {
+      localStorage.setItem(TOKEN_KEY, data.accessToken);
     }
-    if (data.user) {
-      localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+    if (data.refreshToken) {
+      localStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
+    }
+    if (data.data) {
+      localStorage.setItem(USER_KEY, JSON.stringify(data.data));
     }
     
     return data;
+  }
+
+  async function verifyEmail(email, code) {
+    console.log('✓ Email verification:', { email, code });
+    
+    return request('POST', '/auth/verify', {
+      email,
+      code
+    });
+  }
+
+  async function resendVerification(email) {
+    console.log('📧 Resend verification:', { email });
+    
+    return request('POST', '/auth/resend-verification', {
+      email
+    });
+  }
+
+  async function forgotPassword(email) {
+    console.log('🔑 Forgot password:', { email });
+    
+    return request('POST', '/auth/forgot-password', {
+      email
+    });
+  }
+
+  async function resetPassword(token, newPassword) {
+    console.log('🔐 Reset password');
+    
+    // Validate password
+    if (newPassword.length < 8) {
+      throw new Error('Password must be at least 8 characters');
+    }
+    
+    return request('POST', `/auth/reset-password/${token}`, {
+      password: newPassword
+    });
   }
 
   async function getMe() {
@@ -185,17 +263,35 @@
 
   async function logout() {
     try {
-      await request('POST', '/auth/logout', null, true);
+      const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+      if (refreshToken) {
+        await request('POST', '/auth/logout', { refreshToken }, true);
+      }
     } catch (error) {
-      console.log('Logout API call failed (might not be implemented):', error.message);
+      console.log('Logout API call failed:', error.message);
     }
     
     // Always clear local storage
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     
     // Redirect to login
     window.location.href = 'login.html?loggedout=true';
+  }
+
+  async function changePassword(currentPassword, newPassword) {
+    console.log('🔄 Change password');
+    
+    // Validate new password
+    if (newPassword.length < 8) {
+      throw new Error('New password must be at least 8 characters');
+    }
+    
+    return request('POST', '/auth/change-password', {
+      currentPassword,
+      newPassword
+    }, true);
   }
 
   function isAuthenticated() {
@@ -214,6 +310,10 @@
     }
   }
 
+  function getAccessToken() {
+    return localStorage.getItem(TOKEN_KEY);
+  }
+
   // ── Expose Public API ──────────────────────────────────────────────────────
   
   window.ProfitWavyAPI = {
@@ -221,9 +321,17 @@
     register,
     login,
     logout,
+    verifyEmail,
+    resendVerification,
+    forgotPassword,
+    resetPassword,
+    changePassword,
     getMe,
+    
+    // User
     isAuthenticated,
     getCurrentUser,
+    getAccessToken,
     
     // Low-level
     request
@@ -249,22 +357,6 @@
       console.log('Test 2: API endpoint check...');
       const apiTest = await fetch('https://profit-wavy.onrender.com/api/health');
       console.log('API status:', apiTest.status);
-      
-      // Test 3: Try register endpoint
-      console.log('Test 3: Register endpoint...');
-      const testPhone = '0244' + Math.floor(100000 + Math.random() * 900000);
-      const registerTest = await fetch('https://profit-wavy.onrender.com/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: 'Test User',
-          phone: testPhone,
-          password: 'Test123!'
-        })
-      });
-      
-      console.log('Register status:', registerTest.status);
-      console.log('Register response:', await registerTest.json());
       
     } catch (error) {
       console.error('Test failed:', error);
@@ -294,5 +386,3 @@
   }
 
 })();
-
-
