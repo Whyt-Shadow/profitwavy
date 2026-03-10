@@ -174,7 +174,7 @@
     let message = '';
     
     switch(type) {
-      case 'name':
+      case 'fullName':
         if (value.length < 2) {
           isValid = false;
           message = 'Name must be at least 2 characters';
@@ -379,7 +379,7 @@
     const inputs = form.querySelectorAll('input');
     const saveFormData = debounce(() => {
       const formData = {
-        name: document.getElementById('registerName')?.value || '',
+        fullName: document.getElementById('registerName')?.value || '',
         phone: document.getElementById('registerPhone')?.value || '',
         referral: document.getElementById('registerReferral')?.value || ''
       };
@@ -400,7 +400,7 @@
     
     try {
       const data = JSON.parse(savedData);
-      if (data.name) document.getElementById('registerName').value = data.name;
+      if (data.fullName) document.getElementById('registerName').value = data.fullName;
       if (data.phone) document.getElementById('registerPhone').value = data.phone;
       if (data.referral) document.getElementById('registerReferral').value = data.referral;
     } catch (error) {
@@ -474,7 +474,7 @@
     recordAttempt();
     
     // Get form values
-    const name = document.getElementById('Full name')?.value.trim() || '';
+    const fullName = document.getElementById('Full name')?.value.trim() || '';
     const phone = document.getElementById('registerPhone')?.value.replace(/\D/g, '') || '';
     const password = document.getElementById('registerPassword')?.value || '';
     const confirmPassword = document.getElementById('confirmPassword')?.value || '';
@@ -489,7 +489,7 @@
     }
     
     // Validate fields
-    const validationResult = validateAllFields(name, phone, password, confirmPassword);
+    const validationResult = validateAllFields(fullName, phone, password, confirmPassword);
     if (!validationResult.isValid) {
       showToast(validationResult.message, 'error');
       return;
@@ -510,8 +510,8 @@
       }
       
       // Call API
-      console.log('Registration attempt:', { name, phone: phone.substring(0, 4) + '***' });
-      const result = await window.ProfitWavyAPI.register(name, phone, password, referral);
+      console.log('Registration attempt:', { fullName, phone: phone.substring(0, 4) + '***' });
+      const result = await window.ProfitWavyAPI.register(fullName, phone, password, referral);
       
       console.log('Registration successful:', result);
       
@@ -582,7 +582,7 @@
     const phoneInput = document.getElementById('registerPhone');
     
     if (nameInput) {
-      nameInput.addEventListener('input', debounce(() => validateField(nameInput, 'name'), DEBOUNCE_DELAY));
+      nameInput.addEventListener('input', debounce(() => validateField(nameInput, 'fullName'), DEBOUNCE_DELAY));
     }
     
     if (phoneInput) {
@@ -644,12 +644,3 @@
   });
 
 })();
-
-
-
-
-
-
-
-
-
