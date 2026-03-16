@@ -1,4 +1,4 @@
-// js/api.js — Fixed version
+need// js/api.js — Fixed version
 (function () {
   'use strict';
 
@@ -154,7 +154,7 @@
     console.log('📝 Register attempt:', { fullName, phone });
     
     // Validate name length
-    if (!fullName || fullName.trim().length < 2) {
+    if (!fullName || fullName.length < 2) {
       throw new Error('Full name must be at least 2 characters');
     }
     
