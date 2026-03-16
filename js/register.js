@@ -105,7 +105,7 @@
   
   function validateAllFields(fullName, phone, password, confirmPassword = '') {
     // Name validation
-    if (!fullName || fullName.length < 2) {
+    if (!fullName) {
       return { isValid: false, message: 'Please enter your full name (at least 2 characters)' };
     }
     
