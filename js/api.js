@@ -14,7 +14,7 @@ need// js/api.js — Fixed version
   
   async function request(method, path, body = null, requiresAuth = false) {
     const url = `${BASE_URL}${path}`;
-    console.log('📤 API Request:', { method, url, body });
+    console.log('📤 API need:', { method, url, body });
     
     const headers = { 
       'Content-Type': 'application/json',
