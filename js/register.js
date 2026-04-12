@@ -88,8 +88,8 @@
   // ──────────────────────────────────────────────────────────
   // VALIDATION FUNCTIONS
   // ──────────────────────────────────────────────────────────
-  function validateAllFields(fullName, phone, password, confirmPassword = '') {
-    if (!fullName || fullName.length < 2) return { isValid: false, message: 'Please enter your full name' };
+  function validateAllFields(registerName, phone, password, confirmPassword = '') {
+    if (!registerName || registerName.length < 2) return { isValid: false, message: 'Please enter your full name' };
     if (!/^[a-zA-Z\s'-]+$/.test(fullName)) return { isValid: false, message: 'Name contains invalid characters' };
     
     const cleanPhone = phone.replace(/\D/g, '');
