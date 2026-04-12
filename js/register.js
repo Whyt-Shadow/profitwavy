@@ -118,7 +118,7 @@
     let message = '';
     
     switch(type) {
-      case 'fullName':
+      case 'registerName':
         isValid = value.length >= 2 && /^[a-zA-Z\s'-]+$/.test(value);
         message = 'Invalid name format';
         break;
