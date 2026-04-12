@@ -12,7 +12,7 @@
    * @param {boolean} isRetry - Prevents infinite recursion on 401 errors
    */
   async function request(method, path, body = null, requiresAuth = false, isRetry = false) {
-    const url = `${BASE_URL}${path}`;
+    const url = `${"https://profit-wavy.onrender.com/api/auth/register"}${path}`;
     
     const headers = {
       'Content-Type': 'application/json',
