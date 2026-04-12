@@ -168,7 +168,7 @@
         const data = JSON.parse(saved);
         const nameInput = document.getElementById('registerName');
         const phoneInput = document.getElementById('registerPhone');
-        if (nameInput && data.fullName) nameInput.value = data.fullName;
+        if (nameInput && data.registerName) nameInput.value = data.registerName;
         if (phoneInput && data.phone) phoneInput.value = data.phone;
       } catch (e) { console.error(e); }
     }
@@ -195,7 +195,7 @@
     recordAttempt();
 
     // FIXED: Corrected IDs to match initialization
-    const fullName = document.getElementById('registerName')?.value.trim() || '';
+    const registerName = document.getElementById('registerName')?.value.trim() || '';
     const phone = document.getElementById('registerPhone')?.value.replace(/\D/g, '') || '';
     const password = document.getElementById('registerPassword')?.value || '';
     const confirmPassword = document.getElementById('confirmPassword')?.value || '';
@@ -204,14 +204,14 @@
 
     if (terms && !terms.checked) return showToast('Accept terms to continue', 'error');
 
-    const validation = validateAllFields(fullName, phone, password, confirmPassword);
+    const validation = validateAllFields(registerName, phone, password, confirmPassword);
     if (!validation.isValid) return showToast(validation.message, 'error');
 
     const submitBtn = e.target.querySelector('button[type="submit"]');
     setButtonLoading(submitBtn, true, 'Creating Account...');
 
     try {
-      const result = await window.ProfitWavyAPI.register(fullName, phone, password, referral);
+      const result = await window.ProfitWavyAPI.register(registerName, phone, password, referral);
       showToast('🎉 Success! Redirecting...', 'success');
       sessionStorage.removeItem('register_form_data');
       setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
@@ -240,7 +240,7 @@
     const nameInput = document.getElementById('registerName');
     const phoneInput = document.getElementById('registerPhone');
     
-    if (nameInput) nameInput.addEventListener('input', debounce(() => validateField(nameInput, 'fullName'), DEBOUNCE_DELAY));
+    if (nameInput) nameInput.addEventListener('input', debounce(() => validateField(nameInput, 'registerName'), DEBOUNCE_DELAY));
     if (phoneInput) phoneInput.addEventListener('input', debounce(() => validateField(phoneInput, 'phone'), DEBOUNCE_DELAY));
 
     form.addEventListener('submit', handleRegistration);
