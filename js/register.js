@@ -90,7 +90,7 @@
   // ──────────────────────────────────────────────────────────
   function validateAllFields(registerName, phone, password, confirmPassword = '') {
     if (!registerName || registerName.length < 2) return { isValid: false, message: 'Please enter your full name' };
-    if (!/^[a-zA-Z\s'-]+$/.test(fullName)) return { isValid: false, message: 'Name contains invalid characters' };
+    if (!/^[a-zA-Z\s'-]+$/.test(registerName)) return { isValid: false, message: 'Name contains invalid characters' };
     
     const cleanPhone = phone.replace(/\D/g, '');
     if (!/^0(20|23|24|25|26|27|28|50|54|55|56|57|59)\d{7}$/.test(cleanPhone)) {
