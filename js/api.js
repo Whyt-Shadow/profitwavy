@@ -121,15 +121,15 @@
   // ── Public API ─────────────────────────────────────────────────────────────
 
   const API = {
-    async register(fullName, phone, password, referralCode = '') {
+    async register(registerName, phone, password, referralCode = '') {
       const cleanPhone = phone.replace(/\D/g, '');
       
-      if (!fullName || fullName.length < 2) throw new Error('Invalid Name');
+      if (!registerName || registerName.length < 2) throw new Error('Invalid Name');
       if (!/^0\d{9}$/.test(cleanPhone)) throw new Error('Invalid Phone');
       if (password.length < 8) throw new Error('Password too short');
 
       const data = await request('POST', '/auth/register', {
-        fullName: fullName.trim(),
+        fullName: registerName.trim(),
         phone: cleanPhone,
         password,
         referralCode: referralCode.trim() || undefined
