@@ -129,7 +129,7 @@
       if (password.length < 8) throw new Error('Password too short');
 
       const data = await request('POST', '/auth/register', {
-        fullName: registerName.trim(),
+        registerName: registerName.trim(),
         phone: cleanPhone,
         password,
         referralCode: referralCode.trim() || undefined
